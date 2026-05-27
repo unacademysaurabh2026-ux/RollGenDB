@@ -1,5 +1,5 @@
 // ─── CONFIG — paste your Apps Script Web App URL here ─────────────────────────
-var SHEET_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAfqtleoi6xMhQ9CtFdZnTVUs8H2Clt7j1BEshXFw1dRyVr1dn9-jjR6rH7GGu7D0/exec';
 
 // ─── Default Streams & Classes ────────────────────────────────────────────────
 var DEFAULT_STREAMS = [
