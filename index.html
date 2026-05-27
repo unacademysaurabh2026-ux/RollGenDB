@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RollGen — NEET & IIT-JEE</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<!-- ── Loading Overlay ── -->
+<div class="overlay" id="loading-overlay">
+  <div class="dialog" style="text-align:center;padding:2rem 2.5rem">
+    <div class="loading-spinner"></div>
+    <div class="dialog-title" style="margin-top:1rem" id="loading-msg">Loading…</div>
+  </div>
+</div>
+
+<!-- ── Recycled Rolls Pool Modal ── -->
+<div class="overlay" id="recycled-rolls-overlay">
+  <div class="dialog dialog-wide">
+    <div class="dialog-title">♻️ Recycled Roll Numbers</div>
+    <div class="dialog-body" style="text-align:left;margin-bottom:0">
+      These roll numbers were freed when students were permanently deleted. You can reassign them to new students.
+    </div>
+    <div id="recycled-rolls-list" style="margin:1rem 0;max-height:340px;overflow-y:auto"></div>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" id="recycled-rolls-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Assign Roll Modal ── -->
+<div class="overlay" id="assign-roll-overlay">
+  <div class="dialog dialog-wide">
+    <div class="dialog-title">Assign Recycled Roll Number</div>
+    <div style="background:var(--bg);border:1px solid var(--accent-border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;text-align:center">
+      <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Roll Number</div>
+      <div class="roll-preview-num ready" id="assign-roll-num" style="font-size:22px"></div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:4px">Previously assigned to: <span id="assign-prev-name"></span></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.75rem" id="assign-step-indicator"></div>
+
+    <!-- Step 1: Input -->
+    <div id="assign-input-area">
+      <div class="form-group" style="margin-bottom:.75rem">
+        <label for="assign-f-name">Student Name <span class="req">*</span></label>
+        <input id="assign-f-name" type="text" placeholder="Full name"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="assign-f-mobile">Mobile <span class="req">*</span></label>
+          <input id="assign-f-mobile" type="tel" maxlength="10" placeholder="10-digit"/>
+        </div>
+        <div class="form-group">
+          <label for="assign-f-parent">Parent Mobile</label>
+          <input id="assign-f-parent" type="tel" maxlength="10" placeholder="Optional"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Confirm -->
+    <div id="assign-confirm-area" style="display:none">
+      <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <tr><td style="padding:6px 0;color:var(--text-3);width:120px">Roll Number</td><td class="roll-cell" id="assign-confirm-roll"></td></tr>
+        <tr><td style="padding:6px 0;color:var(--text-3)">Name</td><td id="assign-confirm-name"></td></tr>
+        <tr><td style="padding:6px 0;color:var(--text-3)">Mobile</td><td class="mobile-cell" id="assign-confirm-mobile"></td></tr>
+        <tr><td style="padding:6px 0;color:var(--text-3)">Parent Mobile</td><td class="mobile-cell" id="assign-confirm-parent"></td></tr>
+      </table>
+    </div>
+
+    <!-- Step 3: Final -->
+    <div id="assign-final-area" style="display:none;text-align:center;padding:1rem 0">
+      <div style="font-size:28px;margin-bottom:.5rem">⚠️</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:.5rem">You are about to assign roll <span id="assign-final-roll" style="color:var(--accent)"></span> to <span id="assign-final-name"></span>.</div>
+      <div style="font-size:12px;color:var(--text-3)">This roll number will be removed from the recycled pool. Make sure everything is correct.</div>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="assign-cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="assign-next-btn" style="width:auto">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete All Dialog ── -->
+<div class="overlay" id="delete-all-overlay">
+  <div class="dialog">
+    <div class="dialog-icon">⚠️</div>
+    <div class="dialog-title" id="delete-all-title">Delete All Student Data?</div>
+    <div class="dialog-body" id="delete-all-body">This will permanently delete all students and recycle bin data. This cannot be undone.</div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="delete-all-cancel">Cancel</button>
+      <button class="btn btn-red" id="delete-all-ok">Yes, Delete All</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm Dialog ── -->
+<div class="overlay" id="confirm-overlay">
+  <div class="dialog">
+    <div class="dialog-icon">🗑️</div>
+    <div class="dialog-title">Delete Student?</div>
+    <div class="dialog-body" id="confirm-body">This will move the student to Recycle Bin.</div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-red" id="confirm-ok">Move to Bin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ── -->
+<div class="overlay" id="settings-overlay">
+  <div class="dialog dialog-wide">
+    <div class="dialog-title">⚙️ Manage Streams &amp; Classes</div>
+    <div class="dialog-body" style="text-align:left">
+
+      <div class="settings-section">
+        <div class="settings-label">Streams <span class="hint">(2-digit code · name)</span></div>
+        <div id="stream-list" class="tag-list"></div>
+        <div class="add-row">
+          <input id="new-stream-code" type="text" maxlength="2" placeholder="Code (e.g. 18)" style="width:90px"/>
+          <input id="new-stream-name" type="text" placeholder="Name (e.g. Foundation)" style="flex:1"/>
+          <button class="btn btn-accent btn-sm" id="btn-add-stream">+ Add</button>
+        </div>
+      </div>
+
+      <div class="settings-section" style="margin-top:1.5rem">
+        <div class="settings-label">Classes <span class="hint">(2-digit code · name)</span></div>
+        <div id="class-list" class="tag-list"></div>
+        <div class="add-row">
+          <input id="new-class-code" type="text" maxlength="2" placeholder="Code (e.g. 14)" style="width:90px"/>
+          <input id="new-class-name" type="text" placeholder="Name (e.g. Class 10)" style="flex:1"/>
+          <button class="btn btn-accent btn-sm" id="btn-add-class">+ Add</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" id="settings-close">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <div>
+        <div class="logo-title">RollGen</div>
+        <div class="logo-sub">Institute Roll Number Maker</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Streams &amp; Classes
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-bulk-download">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+        Bulk Template
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-import-trigger">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import CSV
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-export">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-recycled-rolls">
+        ♻️ Recycled Rolls
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-delete-all" style="color:var(--red);border-color:var(--red-border)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+        Delete All Data
+      </button>
+      <input type="file" id="file-import" accept=".csv" style="display:none" />
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Stats -->
+  <section class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num" id="s-total">0</span>
+      <span class="stat-label">Total Students</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item" id="stream-stats-area">
+      <!-- rendered by JS -->
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num accent-color" id="s-bin">0</span>
+      <span class="stat-label">In Recycle Bin</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num mono" id="s-last">—</span>
+      <span class="stat-label">Last Roll No.</span>
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="students">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Students
+    </button>
+    <button class="tab" data-tab="bin">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Recycle Bin
+      <span class="tab-badge" id="bin-badge" style="display:none">0</span>
+    </button>
+  </div>
+
+  <div class="layout">
+
+    <!-- Form -->
+    <aside class="form-panel">
+      <div class="panel-label">Add Student</div>
+
+      <div class="form-group">
+        <label for="f-name">Student Name <span class="req">*</span></label>
+        <input id="f-name" type="text" placeholder="Full name" autocomplete="off"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-mobile">Mobile <span class="req">*</span></label>
+          <input id="f-mobile" type="tel" maxlength="10" placeholder="10-digit"/>
+        </div>
+        <div class="form-group">
+          <label for="f-parent">Parent Mobile</label>
+          <input id="f-parent" type="tel" maxlength="10" placeholder="Optional"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-class">Class <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="f-class"></select>
+            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="f-stream">Stream <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="f-stream"></select>
+            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="roll-preview-box" id="roll-preview-box">
+        <div class="roll-preview-label">Roll Number Preview</div>
+        <div class="roll-preview-num" id="roll-preview">— — — — — — — — — —</div>
+        <div class="roll-preview-breakdown" id="roll-breakdown">
+          <span class="seg seg-stream">SS</span>
+          <span class="seg-dot">+</span>
+          <span class="seg seg-year">YY</span>
+          <span class="seg-dot">+</span>
+          <span class="seg seg-class">BB</span>
+          <span class="seg-dot">+</span>
+          <span class="seg seg-serial">NNN</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-add">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Student
+      </button>
+      <div class="form-msg" id="form-msg"></div>
+
+      <div class="legend" id="legend-box">
+        <div class="legend-title">Roll Number Logic</div>
+        <div id="legend-rows"></div>
+      </div>
+    </aside>
+
+    <!-- Table area -->
+    <section class="table-panel">
+
+      <!-- Students tab -->
+      <div id="tab-students" class="tab-content active">
+        <div class="table-toolbar">
+          <div class="panel-label" style="margin:0">Students</div>
+          <div class="toolbar-right">
+            <div class="search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search" placeholder="Search name, roll, mobile…"/>
+            </div>
+            <div class="select-wrap" style="width:140px">
+              <select id="filter-stream">
+                <option value="">All Streams</option>
+              </select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="main-table">
+            <thead>
+              <tr>
+                <th style="width:140px">Roll Number</th>
+                <th>Name</th>
+                <th style="width:100px">Stream</th>
+                <th style="width:100px">Class</th>
+                <th style="width:120px">Mobile</th>
+                <th style="width:130px">Parent Mobile</th>
+                <th style="width:48px"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">⬡</div>
+            <div class="empty-title">No students yet</div>
+            <div class="empty-sub">Fill the form on the left to add your first student.</div>
+          </div>
+        </div>
+        <div class="table-footer" id="table-footer"></div>
+      </div>
+
+      <!-- Recycle Bin tab -->
+      <div id="tab-bin" class="tab-content">
+        <div class="table-toolbar">
+          <div class="panel-label" style="margin:0">Recycle Bin</div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost btn-sm" id="btn-empty-bin">🗑 Empty Bin</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="bin-table">
+            <thead>
+              <tr>
+                <th style="width:140px">Roll Number</th>
+                <th>Name</th>
+                <th style="width:100px">Stream</th>
+                <th style="width:100px">Class</th>
+                <th style="width:120px">Mobile</th>
+                <th style="width:160px">Deleted At</th>
+                <th style="width:90px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bin-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="bin-empty-state">
+            <div class="empty-icon">✅</div>
+            <div class="empty-title">Recycle Bin is empty</div>
+            <div class="empty-sub">Deleted students appear here for recovery.</div>
+          </div>
+        </div>
+        <div class="table-footer" id="bin-footer"></div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
