@@ -1,5 +1,5 @@
 // ─── CONFIG — paste your Apps Script Web App URL here ─────────────────────────
-var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAfqtleoi6xMhQ9CtFdZnTVUs8H2Clt7j1BEshXFw1dRyVr1dn9-jjR6rH7GGu7D0/exec';
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbxnXotBfSTspQpMucCZD6VF3Yfc6q7ECMgAYWBwC_fZON8XShFDE6fyKt_-qRKCPEs/exec';
 
 // ─── Default Streams & Classes ────────────────────────────────────────────────
 var DEFAULT_STREAMS = [
@@ -27,7 +27,7 @@ function apiCall(action, payload) {
   var body = Object.assign({ action: action }, payload || {});
   return fetch(SHEET_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(body)
   }).then(function(r) { return r.json(); });
 }
