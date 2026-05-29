@@ -154,8 +154,6 @@ label{font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercas
 .seg-class{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
 .seg-serial{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .seg-dot{color:var(--text-3);font-size:10px}
-.roll-meta{display:block;margin-top:8px;font-size:11px;color:var(--text-3)}
-.roll-meta b{color:var(--green)}
 .form-msg{min-height:18px;margin-top:8px;font-size:12px}
 .msg-ok{color:var(--green)}.msg-err{color:var(--red)}
 
@@ -210,6 +208,16 @@ tbody tr:last-child td{border-bottom:none}
 .toast.show{opacity:1;transform:none}
 .toast.toast-ok{border-color:var(--green-border);color:var(--green)}
 .toast.toast-err{border-color:var(--red-border);color:var(--red)}
+
+/* ── Loading Spinner ── */
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border-2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Recycled Roll Row ── */
+.recycled-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--bg-3);margin-bottom:8px;flex-wrap:wrap}
 
 @keyframes row-in{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
 .row-new{animation:row-in .25s ease both}
