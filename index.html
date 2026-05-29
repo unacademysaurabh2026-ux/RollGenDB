@@ -12,94 +12,6 @@
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-glow" aria-hidden="true"></div>
 
-<!-- ── Loading Overlay ── -->
-<div class="overlay" id="loading-overlay">
-  <div class="dialog" style="text-align:center;padding:2rem 2.5rem">
-    <div class="loading-spinner"></div>
-    <div class="dialog-title" style="margin-top:1rem" id="loading-msg">Loading…</div>
-  </div>
-</div>
-
-<!-- ── Recycled Rolls Pool Modal ── -->
-<div class="overlay" id="recycled-rolls-overlay">
-  <div class="dialog dialog-wide">
-    <div class="dialog-title">♻️ Recycled Roll Numbers</div>
-    <div class="dialog-body" style="text-align:left;margin-bottom:0">
-      These roll numbers were freed when students were permanently deleted. You can reassign them to new students.
-    </div>
-    <div id="recycled-rolls-list" style="margin:1rem 0;max-height:340px;overflow-y:auto"></div>
-    <div class="dialog-actions">
-      <button class="btn btn-primary" id="recycled-rolls-close">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Assign Roll Modal ── -->
-<div class="overlay" id="assign-roll-overlay">
-  <div class="dialog dialog-wide">
-    <div class="dialog-title">Assign Recycled Roll Number</div>
-    <div style="background:var(--bg);border:1px solid var(--accent-border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;text-align:center">
-      <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Roll Number</div>
-      <div class="roll-preview-num ready" id="assign-roll-num" style="font-size:22px"></div>
-      <div style="font-size:11px;color:var(--text-3);margin-top:4px">Previously assigned to: <span id="assign-prev-name"></span></div>
-    </div>
-    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.75rem" id="assign-step-indicator"></div>
-
-    <!-- Step 1: Input -->
-    <div id="assign-input-area">
-      <div class="form-group" style="margin-bottom:.75rem">
-        <label for="assign-f-name">Student Name <span class="req">*</span></label>
-        <input id="assign-f-name" type="text" placeholder="Full name"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="assign-f-mobile">Mobile <span class="req">*</span></label>
-          <input id="assign-f-mobile" type="tel" maxlength="10" placeholder="10-digit"/>
-        </div>
-        <div class="form-group">
-          <label for="assign-f-parent">Parent Mobile</label>
-          <input id="assign-f-parent" type="tel" maxlength="10" placeholder="Optional"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 2: Confirm -->
-    <div id="assign-confirm-area" style="display:none">
-      <table style="width:100%;font-size:13px;border-collapse:collapse">
-        <tr><td style="padding:6px 0;color:var(--text-3);width:120px">Roll Number</td><td class="roll-cell" id="assign-confirm-roll"></td></tr>
-        <tr><td style="padding:6px 0;color:var(--text-3)">Name</td><td id="assign-confirm-name"></td></tr>
-        <tr><td style="padding:6px 0;color:var(--text-3)">Mobile</td><td class="mobile-cell" id="assign-confirm-mobile"></td></tr>
-        <tr><td style="padding:6px 0;color:var(--text-3)">Parent Mobile</td><td class="mobile-cell" id="assign-confirm-parent"></td></tr>
-      </table>
-    </div>
-
-    <!-- Step 3: Final -->
-    <div id="assign-final-area" style="display:none;text-align:center;padding:1rem 0">
-      <div style="font-size:28px;margin-bottom:.5rem">⚠️</div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:.5rem">You are about to assign roll <span id="assign-final-roll" style="color:var(--accent)"></span> to <span id="assign-final-name"></span>.</div>
-      <div style="font-size:12px;color:var(--text-3)">This roll number will be removed from the recycled pool. Make sure everything is correct.</div>
-    </div>
-
-    <div class="dialog-actions">
-      <button class="btn btn-ghost" id="assign-cancel-btn">Cancel</button>
-      <button class="btn btn-primary" id="assign-next-btn" style="width:auto">Next →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Delete All Dialog ── -->
-<div class="overlay" id="delete-all-overlay">
-  <div class="dialog">
-    <div class="dialog-icon">⚠️</div>
-    <div class="dialog-title" id="delete-all-title">Delete All Student Data?</div>
-    <div class="dialog-body" id="delete-all-body">This will permanently delete all students and recycle bin data. This cannot be undone.</div>
-    <div class="dialog-actions">
-      <button class="btn btn-ghost" id="delete-all-cancel">Cancel</button>
-      <button class="btn btn-red" id="delete-all-ok">Yes, Delete All</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── Confirm Dialog ── -->
 <div class="overlay" id="confirm-overlay">
   <div class="dialog">
@@ -125,8 +37,10 @@
         <div class="add-row">
           <input id="new-stream-code" type="text" maxlength="2" placeholder="Code (e.g. 18)" style="width:90px"/>
           <input id="new-stream-name" type="text" placeholder="Name (e.g. Foundation)" style="flex:1"/>
+          <input id="new-stream-digits" type="number" min="7" max="12" placeholder="Digits (9/10)" style="width:110px"/>
           <button class="btn btn-accent btn-sm" id="btn-add-stream">+ Add</button>
         </div>
+        <div id="stream-digits-hint" style="font-size:11px;color:var(--green);margin-top:6px;min-height:16px"></div>
       </div>
 
       <div class="settings-section" style="margin-top:1.5rem">
@@ -172,13 +86,6 @@
       <button class="btn btn-ghost btn-sm" id="btn-export">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
-      </button>
-      <button class="btn btn-ghost btn-sm" id="btn-recycled-rolls">
-        ♻️ Recycled Rolls
-      </button>
-      <button class="btn btn-ghost btn-sm" id="btn-delete-all" style="color:var(--red);border-color:var(--red-border)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
-        Delete All Data
       </button>
       <input type="file" id="file-import" accept=".csv" style="display:none" />
     </div>
@@ -269,7 +176,7 @@
           <span class="seg-dot">+</span>
           <span class="seg seg-class">BB</span>
           <span class="seg-dot">+</span>
-          <span class="seg seg-serial">NNN</span>
+          <span class="seg seg-serial">NNNN</span>
         </div>
       </div>
 
